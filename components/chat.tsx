@@ -1,6 +1,6 @@
 'use client';
 
-import type { Attachment, Message } from 'ai';
+import type { Attachment, UIMessage } from 'ai';
 import { useChat } from '@ai-sdk/react';
 import { useState } from 'react';
 import useSWR, { useSWRConfig } from 'swr';
@@ -22,7 +22,7 @@ export function Chat({
   isReadonly,
 }: {
   id: string;
-  initialMessages: Array<Message>;
+  initialMessages: Array<UIMessage>;
   selectedChatModel: string;
   selectedVisibilityType: VisibilityType;
   isReadonly: boolean;
@@ -36,7 +36,7 @@ export function Chat({
     input,
     setInput,
     append,
-    isLoading,
+    status,
     stop,
     reload,
   } = useChat({
@@ -55,7 +55,7 @@ export function Chat({
   });
 
   const { data: votes } = useSWR<Array<Vote>>(
-    `/api/vote?chatId=${id}`,
+    messages.length >= 2 ? `/api/vote?chatId=${id}` : null,
     fetcher,
   );
 
@@ -74,7 +74,7 @@ export function Chat({
 
         <Messages
           chatId={id}
-          isLoading={isLoading}
+          status={status}
           votes={votes}
           messages={messages}
           setMessages={setMessages}
@@ -90,7 +90,7 @@ export function Chat({
               input={input}
               setInput={setInput}
               handleSubmit={handleSubmit}
-              isLoading={isLoading}
+              status={status}
               stop={stop}
               attachments={attachments}
               setAttachments={setAttachments}
@@ -107,7 +107,7 @@ export function Chat({
         input={input}
         setInput={setInput}
         handleSubmit={handleSubmit}
-        isLoading={isLoading}
+        status={status}
         stop={stop}
         attachments={attachments}
         setAttachments={setAttachments}

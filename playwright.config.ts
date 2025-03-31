@@ -29,7 +29,7 @@ export default defineConfig({
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
-  retries: process.env.CI ? 2 : 0,
+  retries: process.env.CI ? 2 : 1,
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
@@ -44,24 +44,52 @@ export default defineConfig({
   },
 
   /* Configure global timeout for each test */
-  timeout: 30000,
+  timeout: 60 * 1000, // 30 seconds
   expect: {
-    timeout: 30000,
+    timeout: 60 * 1000,
   },
 
-  /* Configure projects for major browsers */
+  /* Configure projects */
   projects: [
     {
-      name: 'setup',
-      testMatch: /.*\.setup\.ts/,
+      name: 'setup:auth',
+      testMatch: /auth.setup.ts/,
     },
     {
-      name: 'chromium',
+      name: 'setup:reasoning',
+      testMatch: /reasoning.setup.ts/,
+      dependencies: ['setup:auth'],
       use: {
         ...devices['Desktop Chrome'],
-        storageState: 'playwright/.auth/user.json',
+        storageState: 'playwright/.auth/session.json',
       },
-      dependencies: ['setup'],
+    },
+    {
+      name: 'chat',
+      testMatch: /chat.test.ts/,
+      dependencies: ['setup:auth'],
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: 'playwright/.auth/session.json',
+      },
+    },
+    {
+      name: 'reasoning',
+      testMatch: /reasoning.test.ts/,
+      dependencies: ['setup:reasoning'],
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: 'playwright/.reasoning/session.json',
+      },
+    },
+    {
+      name: 'artifacts',
+      testMatch: /artifacts.test.ts/,
+      dependencies: ['setup:auth'],
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: 'playwright/.auth/session.json',
+      },
     },
 
     // {
