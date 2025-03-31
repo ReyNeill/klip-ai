@@ -25,6 +25,7 @@ import { requestSuggestions } from '@/lib/ai/tools/request-suggestions';
 import { getWeather } from '@/lib/ai/tools/get-weather';
 import { isProductionEnvironment } from '@/lib/constants';
 import { myProvider } from '@/lib/ai/providers';
+import { ACTIVE_CHAT_MODEL_ID } from '@/lib/ai/models';
 
 export const maxDuration = 60;
 
@@ -33,11 +34,9 @@ export async function POST(request: Request) {
     const {
       id,
       messages,
-      selectedChatModel,
     }: {
       id: string;
       messages: Array<UIMessage>;
-      selectedChatModel: string;
     } = await request.json();
 
     const session = await auth();
@@ -82,19 +81,16 @@ export async function POST(request: Request) {
     return createDataStreamResponse({
       execute: (dataStream) => {
         const result = streamText({
-          model: myProvider.languageModel(selectedChatModel),
-          system: systemPrompt({ selectedChatModel }),
+          model: myProvider.languageModel(ACTIVE_CHAT_MODEL_ID),
+          system: systemPrompt({ selectedChatModel: ACTIVE_CHAT_MODEL_ID }),
           messages,
           maxSteps: 5,
-          experimental_activeTools:
-            selectedChatModel === 'chat-model-reasoning'
-              ? []
-              : [
-                  'getWeather',
-                  'createDocument',
-                  'updateDocument',
-                  'requestSuggestions',
-                ],
+          experimental_activeTools: [
+            'getWeather',
+            'createDocument',
+            'updateDocument',
+            'requestSuggestions',
+          ],
           experimental_transform: smoothStream({ chunking: 'word' }),
           experimental_generateMessageId: generateUUID,
           tools: {
