@@ -6,9 +6,9 @@
     "dev": "next dev --turbo",
     "build": "tsx lib/db/migrate && next build",
     "start": "next start",
-    "lint": "next lint && biome lint --write --unsafe",
-    "lint:fix": "next lint --fix && biome lint --write --unsafe",
-    "format": "biome format --write",
+    "lint": "next lint && eslint .",
+    "lint:fix": "next lint --fix && eslint . --fix",
+    "format": "prettier --write .",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "npx tsx lib/db/migrate.ts",
     "db:studio": "drizzle-kit studio",
@@ -19,9 +19,7 @@
     "test": "export PLAYWRIGHT=True && pnpm exec playwright test --workers=4"
   },
   "dependencies": {
-    "@ai-sdk/groq": "^1.2.2",
     "@ai-sdk/react": "^1.2.4",
-    "@ai-sdk/xai": "^1.2.4",
     "@codemirror/lang-javascript": "^6.2.3",
     "@codemirror/lang-python": "^6.1.7",
     "@codemirror/state": "^6.5.2",
@@ -84,7 +82,6 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
-    "@biomejs/biome": "1.9.4",
     "@playwright/test": "^1.51.1",
     "@tailwindcss/typography": "^0.5.16",
     "@types/d3-scale": "^4.0.9",
