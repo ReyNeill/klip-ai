@@ -1,15 +1,14 @@
 "use server";
 
-import { generateText, Message } from "ai";
-// import { cookies } from 'next/headers'; // Removed cookies import
-
+import { generateText, type UIMessage } from 'ai';
+import { cookies } from 'next/headers';
 import {
   deleteMessagesByChatIdAfterTimestamp,
   getMessageById,
   updateChatVisiblityById,
-} from "@/lib/db/queries";
-import { VisibilityType } from "@/components/visibility-selector";
-import { myProvider } from "@/lib/ai/providers";
+} from '@/lib/db/queries';
+import type { VisibilityType } from '@/components/visibility-selector';
+import { myProvider } from '@/lib/ai/providers';
 
 // Removed saveChatModelAsCookie function
 // export async function saveChatModelAsCookie(model: string) {
@@ -20,7 +19,7 @@ import { myProvider } from "@/lib/ai/providers";
 export async function generateTitleFromUserMessage({
   message,
 }: {
-  message: Message;
+  message: UIMessage;
 }) {
   const { text: title } = await generateText({
     model: myProvider.languageModel("title-model"),

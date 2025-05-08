@@ -1,32 +1,37 @@
-import { auth } from "@/app/(auth)/auth";
-import { getChatsByUserId } from "@/lib/db/queries";
+import { auth } from '@/app/(auth)/auth';
+import { NextRequest } from 'next/server';
+import { getChatsByUserId } from '@/lib/db/queries';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const { searchParams } = request.nextUrl;
+
+  const limit = parseInt(searchParams.get('limit') || '10');
+  const startingAfter = searchParams.get('starting_after');
+  const endingBefore = searchParams.get('ending_before');
+
+  if (startingAfter && endingBefore) {
+    return Response.json(
+      'Only one of starting_after or ending_before can be provided!',
+      { status: 400 },
+    );
+  }
+
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    return Response.json('Unauthorized!', { status: 401 });
+  }
+
   try {
-    const session = await auth();
-    console.log("API History - Session:", JSON.stringify(session, null, 2));
+    const chats = await getChatsByUserId({
+      id: session.user.id,
+      limit,
+      startingAfter,
+      endingBefore,
+    });
 
-    if (!session || !session.user) {
-      console.error("API History - Unauthorized: No session or user found");
-      return Response.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const userId = session.user.id;
-    if (!userId) {
-      console.error(
-        "API History - Error: User ID not found in session",
-        JSON.stringify(session.user, null, 2),
-      );
-      return Response.json(
-        { error: "User ID missing in session" },
-        { status: 500 },
-      );
-    }
-
-    const chats = await getChatsByUserId({ id: userId });
     return Response.json(chats);
-  } catch (error) {
-    console.error("API History - Unexpected error:", error);
-    return Response.json({ error: "Internal Server Error" }, { status: 500 });
+  } catch (_) {
+    return Response.json('Failed to fetch chats!', { status: 500 });
   }
 }

@@ -2,10 +2,9 @@ import {
   customProvider,
   extractReasoningMiddleware,
   wrapLanguageModel,
-} from "ai";
-import { openai } from "@ai-sdk/openai";
-import { google } from "@ai-sdk/google";
-import { isTestEnvironment } from "../constants";
+} from 'ai';
+import { xai } from '@ai-sdk/xai';
+import { isTestEnvironment } from '../constants';
 import {
   artifactModel,
   chatModel,
@@ -25,11 +24,10 @@ export const myProvider = isTestEnvironment
     })
   : customProvider({
       languageModels: {
-        "chat-model-small": google("gemini-2.0-flash"),
-        "chat-model-large": google("gemini-2.0-flash"),
-        "chat-model-reasoning": wrapLanguageModel({
-          model: google("gemini-2.0-flash"),
-          middleware: extractReasoningMiddleware({ tagName: "think" }),
+        'chat-model': xai('grok-2-vision-1212'),
+        'chat-model-reasoning': wrapLanguageModel({
+          model: xai('grok-3-mini-beta'),
+          middleware: extractReasoningMiddleware({ tagName: 'think' }),
         }),
         "title-model": google("gemini-2.0-flash"),
         "artifact-model": google("gemini-2.0-flash"),
